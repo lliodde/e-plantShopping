@@ -3,50 +3,53 @@ import { useSelector, useDispatch } from 'react-redux';
 import { removeItem, updateQuantity } from './CartSlice';
 import './CartItem.css';
 
-const CartItem = ({ onContinueShopping }) => {
+const CartItem = ({ onContinueShopping, onRemoveFromCart }) => {
   const cart = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
+  let totalAmount = 0;
 
-  // ✅ Calculate total cost of all items in the cart
+  // Calculate total amount for all products in the cart
   const calculateTotalAmount = () => {
-    let total = 0;
     cart.forEach(item => {
-      total += parseFloat(item.cost.substring(1)) * item.quantity;
+      totalAmount += parseFloat(item.cost.substring(1)) * item.quantity;
     });
-    return total.toFixed(2); // Format to two decimal places
+    return totalAmount.toFixed(2);
   };
 
-  // ✅ Handle "Continue Shopping" by calling the parent function
   const handleContinueShopping = (e) => {
-    e.preventDefault();
-    onContinueShopping();
+    onContinueShopping(e);
   };
 
-  // ✅ Handle checkout placeholder
+
+  const handleIncrement = (item) => {
+    const updatedItem = { ...item, quantity: item.quantity + 1 };
+    dispatch(updateQuantity({ name: item.name, quantity: updatedItem.quantity }));  
+  };
+
+  const handleDecrement = (item) => {
+    if (item.quantity > 1) {
+      const updatedItem = { ...item, quantity: item.quantity - 1 };
+      dispatch(updateQuantity({ name: item.name, quantity: updatedItem.quantity }));
+    } else {
+      // If quantity is 1, remove the item from the cart
+      dispatch(removeItem(item.name));
+            if (onRemoveFromCart) onRemoveFromCart(item.name);
+
+    } 
+  };
+
+  const handleRemove = (item) => {
+    dispatch(removeItem(item.name));
+        if (onRemoveFromCart) onRemoveFromCart(item.name);
+
+    alert(`${item.name} has been removed from the cart.`);  
+  };
+
   const handleCheckoutShopping = (e) => {
     alert('Functionality to be added for future reference');
   };
 
-  // ✅ Increment item quantity
-  const handleIncrement = (item) => {
-    dispatch(updateQuantity({ name: item.name, quantity: item.quantity + 1 }));
-  };
-
-  // ✅ Decrement item quantity with conditional removal at zero
-  const handleDecrement = (item) => {
-    if (item.quantity > 1) {
-      dispatch(updateQuantity({ name: item.name, quantity: item.quantity - 1 }));
-    } else {
-      dispatch(removeItem(item)); // Remove if quantity drops to 0
-    }
-  };
-
-  // ✅ Remove item completely from the cart
-  const handleRemove = (item) => {
-    dispatch(removeItem(item));
-  };
-
-  // ✅ Calculate individual item subtotal
+  // Calculate total cost based on quantity for an item
   const calculateTotalCost = (item) => {
     return (parseFloat(item.cost.substring(1)) * item.quantity).toFixed(2);
   };
