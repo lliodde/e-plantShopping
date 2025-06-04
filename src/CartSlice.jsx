@@ -7,32 +7,31 @@ export const CartSlice = createSlice({
   },
   reducers: {
     addItem: (state, action) => {
-      const newItem = action.payload;
-      const existingItem = state.items.find(item => item.name === newItem.name);
-
+      const { name, image, cost } = action.payload; // Destructure product details from the action payload
+      // Check if the item already exists in the cart by comparing names
+      const existingItem = state.items.find(item => item.name === name);
       if (existingItem) {
-        existingItem.quantity += 1; // Increment quantity if item already exists
+        // If item already exists in the cart, increase its quantity
+        existingItem.quantity++;
       } else {
-        state.items.push({ ...newItem, quantity: 1 }); // Add item with initial quantity
+        // If item does not exist, add it to the cart with quantity 1
+        state.items.push({ name, image, cost, quantity: 1 });
       }
     },
-
-    // ✅ Remove Item Reducer
     removeItem: (state, action) => {
-      state.items = state.items.filter(item => item.name !== action.payload.name);
+      state.items = state.items.filter(item => item.name !== action.payload);
     },
-
-    // ✅ Update Quantity Reducer
     updateQuantity: (state, action) => {
-      const { name, quantity } = action.payload; // Extract name & quantity
+      const { name, quantity } = action.payload; // Destructure the product name and new quantity from the action payload
+      // Find the item in the cart that matches the given name
       const itemToUpdate = state.items.find(item => item.name === name);
-
       if (itemToUpdate) {
-        itemToUpdate.quantity = quantity; // Update quantity if item exists
+        itemToUpdate.quantity = quantity; // If the item is found, update its quantity to the new value
       }
     },
   },
 });
 
 export const { addItem, removeItem, updateQuantity } = CartSlice.actions;
+
 export default CartSlice.reducer;
